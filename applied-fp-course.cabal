@@ -33,6 +33,15 @@ library
     Level04.Types.CommentText
     Level04.Types.Error
     Level04.Types.Topic
+    Level05.AppM
+    Level05.Conf
+    Level05.Core
+    Level05.DB
+    Level05.DB.Types
+    Level05.Types
+    Level05.Types.CommentText
+    Level05.Types.Error
+    Level05.Types.Topic
 
   ghc-options:
     -Wall -fno-warn-unused-binds -fno-warn-unused-do-bind
@@ -100,6 +109,15 @@ test-suite app-fp-tests
     Level04.Types.CommentText
     Level04.Types.Error
     Level04.Types.Topic
+    Level05.AppM
+    Level05.Conf
+    Level05.Core
+    Level05.DB
+    Level05.DB.Types
+    Level05.Types
+    Level05.Types.CommentText
+    Level05.Types.Error
+    Level05.Types.Topic
    
 
 -- Level Executables
@@ -123,6 +141,15 @@ executable level02-exe
 
 executable level04-exe
   main-is:          Level04.hs
+  hs-source-dirs:   exe
+  build-depends:
+      applied-fp-course
+    , base
+
+  default-language: Haskell2010
+
+executable level05-exe
+  main-is:          Level05.hs
   hs-source-dirs:   exe
   build-depends:
       applied-fp-course

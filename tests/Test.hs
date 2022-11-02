@@ -51,12 +51,12 @@ import           Network.HTTP.Types as HTTP
 -- | This import is provided for you so you can check your work from Level02. As
 -- you move forward, come back and import your latest 'Application' so that you
 -- can test your work as you progress.
-import qualified Level04.Core       as Core
+import qualified Level05.Core       as Core
 import Control.Monad.Cont (MonadIO(liftIO))
 
 import qualified Data.Aeson as Aeson
 import Test.Tasty.HUnit (assertEqual, assertBool, assertFailure)
-import Level04.Conf (Conf(Conf))
+import Level05.Conf (Conf(Conf))
 
 main :: IO ()
 main = do
