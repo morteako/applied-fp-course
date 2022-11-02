@@ -1,8 +1,7 @@
 {-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE NamedFieldPuns #-}
+
 
 module Level04.Types
   ( Error (..)
@@ -35,9 +34,9 @@ import qualified Data.Time.Format           as TF
 
 
 
-import           Level04.DB.Types          
+import           Level04.DB.Types
 
--- | Notice how we've moved these types into their own modules. It's cheap and
+-- Notice how we've moved these types into their own modules. It's cheap and
 -- easy to add modules to carve out components in a Haskell application. So
 -- whenever you think that a module is too big, covers more than one piece of
 -- distinct functionality, or you want to carve out a particular piece of code,
@@ -46,14 +45,15 @@ import           Level04.Types.CommentText  (CommentText, getCommentText,
                                              mkCommentText)
 import           Level04.Types.Topic        (Topic, getTopic, mkTopic)
 
-import           Level04.Types.Error        (Error (EmptyCommentText, EmptyTopic, UnknownRoute))
+import           Level04.Types.Error        (Error (..))
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
 import Data.Aeson (ToJSON)
-import Level04.DB.Types
 
 newtype CommentId = CommentId Int
-  deriving (Eq, Show)
+  deriving (Generic, Eq, Show)
+
+instance ToJSON CommentId
 
 -- | This is the `Comment` record that we will be sending to users, it's a
 -- straightforward record type, containing an `Int`, `Topic`, `CommentText`, and
@@ -64,7 +64,9 @@ data Comment = Comment
   , commentBody  :: CommentText
   , commentTime  :: UTCTime
   }
-  deriving Show
+  deriving (Generic, Show)
+
+instance ToJSON Comment
 
 -- Implement Aeson.ToJSON for Comment
 
@@ -75,8 +77,14 @@ data Comment = Comment
 fromDBComment
   :: DBComment
   -> Either Error Comment
-fromDBComment =
-  error "fromDBComment not yet implemented"
+fromDBComment dbc =
+  let
+    commentId = CommentId $ dbCommentId dbc
+    topic = mkTopic $ dbCommentTopic dbc
+    body = mkCommentText $ dbCommentBody dbc
+    time = dbCommentTime dbc
+  in
+    Comment commentId <$> topic <*> body <*> pure time
 
 data RqType
   = AddRq Topic CommentText

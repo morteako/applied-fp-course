@@ -49,12 +49,12 @@ import Data.Aeson (encode)
 import qualified Data.Aeson.Encoding as Aeson
 import Data.Aeson.Types (ToJSON)
 import Data.Bifunctor
-import Level04.Conf (Conf (Conf), firstAppConfig)
+import Level04.Conf (Conf (Conf, dbFilePath), firstAppConfig)
 import Level04.DB
 import qualified Level04.DB as DB
 import Level04.Types (
   ContentType (JSON, PlainText),
-  Error (EmptyCommentText, EmptyTopic, UnknownRoute),
+  Error (..),
   RqType (AddRq, ListRq, ViewRq),
   mkCommentText,
   mkTopic,
@@ -62,6 +62,7 @@ import Level04.Types (
  )
 
 import System.Exit (ExitCode (ExitFailure), exitWith)
+import System.IO (stderr, hPrint)
 
 -- Our start-up is becoming more complicated and could fail in new and
 -- interesting ways. But we also want to be able to capture these errors in a
@@ -71,7 +72,14 @@ data StartUpError
   deriving (Show)
 
 runApp :: IO ()
-runApp = error "runApp needs re-implementing"
+runApp = do
+  res <- prepareAppReqs firstAppConfig
+  either exitWithErrorMessage (run 3000 . app) res
+
+exitWithErrorMessage :: StartUpError -> IO ()
+exitWithErrorMessage (DBInitErr sqlErr) = do
+  hPrint stderr sqlErr
+  exitWith $ ExitFailure 1
 
 -- We need to complete the following steps to prepare our app requirements:
 --
@@ -82,8 +90,9 @@ runApp = error "runApp needs re-implementing"
 --
 prepareAppReqs ::
   Conf -> IO (Either StartUpError DB.FirstAppDB)
-prepareAppReqs =
-  error "prepareAppReqs not implemented"
+prepareAppReqs conf =
+  first DBInitErr <$> initDB (dbFilePath conf)
+
 
 -- | Some helper functions to make our lives a little more DRY.
 mkResponse ::
@@ -161,12 +170,12 @@ handleRequest ::
   DB.FirstAppDB ->
   RqType ->
   IO (Either Error Response)
-handleRequest _db (AddRq _ _) =
-  (resp200 PlainText "Success" <$) <$> error "AddRq handler not implemented"
-handleRequest _db (ViewRq _) =
-  error "ViewRq handler not implemented"
+handleRequest _db (AddRq topic comment) =
+  (resp200 PlainText "Success" <$) <$> addCommentToTopic _db topic comment
+handleRequest _db (ViewRq topic) =
+  fmap resp200Json <$> getComments _db topic
 handleRequest _db ListRq =
-  error "ListRq handler not implemented"
+  fmap resp200Json <$> getTopics _db
 
 mkRequest ::
   Request ->
@@ -211,3 +220,5 @@ mkErrorResponse EmptyCommentText =
   resp400 PlainText "Empty Comment"
 mkErrorResponse EmptyTopic =
   resp400 PlainText "Empty Topic"
+mkErrorResponse (SqlError err) =
+  resp500 PlainText $ LBS.pack $ "SQL Error: " ++ show err

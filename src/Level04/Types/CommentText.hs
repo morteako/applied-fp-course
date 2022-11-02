@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Level04.Types.CommentText (
   CommentText,
@@ -13,9 +14,12 @@ import Level04.Types.Error (
 
 import Data.Functor.Contravariant (contramap)
 import Data.Text (Text)
+import GHC.Generics (Generic)
+import Data.Aeson (ToJSON)
+import Database.SQLite.Simple.ToField (ToField)
 
 newtype CommentText = CommentText Text
-  deriving (Show)
+  deriving (Generic, Show, ToField)
 
 mkCommentText ::
   Text ->
@@ -30,3 +34,5 @@ getCommentText (CommentText t) =
   t
 
 --implement ToJSON CommentText
+
+instance ToJSON CommentText
