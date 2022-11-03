@@ -95,7 +95,7 @@ instance Monad AppM where
   --     case fmap f x' of
   --       Left err -> pure $ Left err
   --       Right res -> runAppM res
-  (>>=) (AppM x) f = AppM $ x >>= \q -> either (pure . Left) (runAppM . f) q
+  (>>=) (AppM x) f = AppM $ x >>= either (pure . Left) (runAppM . f)
 
 instance MonadIO AppM where
   liftIO :: IO a -> AppM a
