@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE DerivingVia #-}
 module Level05.AppM
   ( AppM
   , liftEither
@@ -16,6 +17,7 @@ import           Level05.Types          (Error)
 
 import GHC.Base (IO(..))
 import Control.Applicative (liftA2)
+import Control.Monad.Trans.Except
 
 -- We're going to add a very useful abstraction to our application. We'll
 -- automate away the explicit error handling and inspection of our Either values
@@ -49,7 +51,9 @@ import Control.Applicative (liftA2)
 -- values we expect to appear on the happy path, knowing that if the sad path is
 -- encountered, the structure of our AppM will automatically handle it for us.
 
-newtype AppM a = AppM (IO (Either Error a))
+
+-- ExceptT Error IO a = IO (Either Error a)
+newtype AppM a = AppM (ExceptT Error IO a)  deriving (Functor,Applicative, Monad, MonadError Error, MonadIO) via ExceptT Error IO
 -- This structure allows us to start writing our functions in terms of
 -- constraints. As an example, if we wanted to abstract over IO and indicate
 -- that instead of the concrete type we wanted a constraint that allows for IO
@@ -69,44 +73,8 @@ runAppM
   :: AppM a
   -> IO (Either Error a)
 runAppM (AppM m) =
-  m
+  runExceptT m
 
-instance Functor AppM where
-  fmap :: (a -> b) -> AppM a -> AppM b
-  fmap f (AppM x) =
-    AppM $ fmap f <$> x
-
-instance Applicative AppM where
-  pure :: a -> AppM a
-  pure = AppM . pure . Right
-
-  (<*>) :: AppM (a -> b) -> AppM a -> AppM b
-  (<*>) (AppM f) (AppM x) =
-    -- AppM $ do 
-    --      f' <- f
-    --      x' <- x
-    --      pure $ f' <*> x'
-    AppM $ liftA2 (<*>) f x
-
-instance Monad AppM where
-  (>>=) :: AppM a -> (a -> AppM b) -> AppM b
-  -- (>>=) (AppM x) f = AppM $ do
-  --     x' <- x
-  --     case fmap f x' of
-  --       Left err -> pure $ Left err
-  --       Right res -> runAppM res
-  (>>=) (AppM x) f = AppM $ x >>= either (pure . Left) (runAppM . f)
-
-instance MonadIO AppM where
-  liftIO :: IO a -> AppM a
-  liftIO a = AppM $ fmap Right a
-
-instance MonadError Error AppM where
-  throwError :: Error -> AppM a
-  throwError = AppM . pure . Left
-
-  catchError :: AppM a -> (Error -> AppM a) -> AppM a
-  catchError (AppM x) f = AppM $ x >>= either (runAppM . f) (pure . Right)
 
 -- This is a helper function that will `lift` an Either value into our new AppM
 -- by applying `throwError` to the Left value, and using `pure` to lift the
