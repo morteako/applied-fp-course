@@ -63,8 +63,9 @@ import Level05.Types (
 
 import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.IO (stderr, hPrint)
-import Level05.AppM (AppM (..), liftEither, runAppM)
+import Level05.AppM (AppM, liftEither, runAppM)
 import Data.Function ((&))
+import qualified Control.Monad.Error.Class as MonadError
 
 -- Our start-up is becoming more complicated and could fail in new and
 -- interesting ways. But we also want to be able to capture these errors in a
@@ -154,7 +155,10 @@ resp200Json =
 app
   :: DB.FirstAppDB
   -> Application
-app db rq cb = mkRequest rq >>= handleRequest db & runAppM >>= cb . either mkErrorResponse id
+app db rq cb = do
+  response <- runAppM $ mkRequest rq >>= handleRequest db
+  cb . either mkErrorResponse id $ response
+  
 
 handleRequest ::
   DB.FirstAppDB ->
@@ -177,7 +181,7 @@ mkRequest rq =
     -- List the current topics
     (["list"], "GET") -> pure mkListRequest
     -- Finally we don't care about any other requests so build an Error response
-    _ -> pure (Left UnknownRoute)
+    _ -> MonadError.throwError UnknownRoute
 
 mkAddRequest ::
   Text ->
