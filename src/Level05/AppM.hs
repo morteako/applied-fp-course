@@ -2,7 +2,7 @@
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Level05.AppM
-  ( AppM(..)
+  ( AppM
   , liftEither
   , runAppM
   ) where
@@ -118,7 +118,6 @@ instance MonadError Error AppM where
 liftEither
   :: Either Error a
   -> AppM a
-liftEither (Left err) = throwError err
-liftEither (Right x) = pure x
+liftEither = either throwError pure
 
 -- Go to 'src/Level05/DB.hs' next.

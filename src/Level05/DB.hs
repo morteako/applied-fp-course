@@ -30,7 +30,7 @@ import           Level05.Types                      (Comment, CommentText,
                                                      getCommentText, getTopic,
                                                      mkTopic)
 
-import           Level05.AppM                       (AppM(..))
+import           Level05.AppM                       (AppM, liftEither)
 import Level05.DB.Types (DBComment(..))
 import Database.SQLite.Simple.Types (Only(..))
 
@@ -75,10 +75,9 @@ runDB f query =
   -- This function is intended to abstract away the running of DB functions and
   -- the catching of any errors. As well as the process of running some
   -- processing function over those results.
-  -- TODO: AppM constructor was not exported, so is this the wrong way to do it?
-  AppM $ do
-    dbRes <- Sql.runDBAction $ f <$> query
-    pure $ mapDbErrors dbRes
+  do
+    dbRes <- liftIO $ Sql.runDBAction $ f <$> query
+    liftEither $ mapDbErrors dbRes
   where mapDbErrors = either (Left . SqlError) id
 
   -- Move your use of Sql.runDBAction to this function to avoid repeating
