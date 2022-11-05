@@ -63,7 +63,7 @@ import Level05.Types (
 
 import System.Exit (ExitCode (ExitFailure), exitWith)
 import System.IO (stderr, hPrint)
-import Level05.AppM (AppM (..), liftEither, runAppM)
+import Level05.AppM (AppM, liftEither, runAppM)
 import Data.Function ((&))
 
 -- Our start-up is becoming more complicated and could fail in new and

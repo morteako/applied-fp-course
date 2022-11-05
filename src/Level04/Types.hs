@@ -79,12 +79,12 @@ fromDBComment
   -> Either Error Comment
 fromDBComment dbc =
   let
-    commentId = CommentId $ dbCommentId dbc
+    _commentId = CommentId $ dbCommentId dbc
     topic = mkTopic $ dbCommentTopic dbc
     body = mkCommentText $ dbCommentBody dbc
     time = dbCommentTime dbc
   in
-    Comment commentId <$> topic <*> body <*> pure time
+    Comment _commentId <$> topic <*> body <*> pure time
 
 data RqType
   = AddRq Topic CommentText
