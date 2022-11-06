@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Level06.Core (
-  runApp,
+  runApplication,
   prepareAppReqs,
   app,
 ) where
@@ -50,12 +50,16 @@ import Data.Aeson.Types (ToJSON)
 import           Level06.AppM                       (App, AppM (..), liftEither, runApp)
 import qualified Level06.Conf                       as Conf
 import qualified Level06.DB                         as DB
-import           Level06.Types                      (Conf, ConfigError,
+import           Level06.Types                      (Conf, ConfigError(..),
                                                      ContentType (..),
                                                      Error (..),
                                                      RqType (AddRq, ListRq, ViewRq),
                                                      mkCommentText, mkTopic,
-                                                     renderContentType)
+                                                     renderContentType, dbPath, getDBFilePath)
+import Data.Bifunctor (first)
+import System.IO (hPrint, stderr)
+import System.Exit (exitWith, ExitCode (..))
+import Control.Monad ((<=<))
 
 
 -- Our start-up is becoming more complicated and could fail in new and
@@ -67,8 +71,31 @@ data StartUpError
   deriving (Show)
 
 runApplication :: IO ()
-runApplication = error "copy your previous 'runApp' implementation and refactor as needed"
+runApplication = do
+  -- Load our configuration
+  cfgE <- runAppM prepareAppReqs
+  -- Loading the configuration can fail, so we have to take that into account now.
+  case cfgE of
+    Left (DBInitErr sqlErr) -> do
+      -- We can't run our app at all! Display the message and exit the application.
+      hPrint stderr sqlErr
+      exitWith $ ExitFailure 1
+    Left (ConfErr cfgErr) -> do
+      hPrint stderr $ getCfgError cfgErr
+      exitWith $ ExitFailure 1
 
+    Right (cfg, db) ->
+      -- We have a valid config! We can now complete the various pieces needed to run our
+      -- application. This function 'finally' will execute the first 'IO a', and then, even in the
+      -- case of that value throwing an exception, execute the second 'IO b'. We do this to ensure
+      -- that our DB connection will always be closed when the application finishes, or crashes.
+      Ex.finally (run 3000 $ app cfg db) (DB.closeDB db)
+
+getCfgError :: ConfigError -> String
+getCfgError err = case err of
+  BadConfFile str -> "Bad config file: " <> str
+  MissingPortConf -> "Missing port configuration"
+  MissingDbFileConf -> "Missing dbFile configuration"
 -- | We need to complete the following steps to prepare our app requirements:
 --
 -- 1) Load the configuration.
@@ -82,7 +109,11 @@ runApplication = error "copy your previous 'runApp' implementation and refactor 
 -- up!
 --
 prepareAppReqs :: AppM StartUpError (Conf, DB.FirstAppDB)
-prepareAppReqs = error "copy your prepareAppReqs from the previous level."
+prepareAppReqs = do
+  conf <- first ConfErr $ Conf.parseOptions "files/appconfig.json"
+  db <- first DBInitErr $ liftEither <=< liftIO $ DB.initDB $ getDBFilePath . dbPath $ conf
+  pure (conf, db)
+  
 
 -- | Some helper functions to make our lives a little more DRY.
 mkResponse ::
@@ -130,6 +161,7 @@ resp200Json =
   mkResponse status200 JSON . encode
 
 -- | Now that we have our configuration, pass it where it needs to go.
+-- TODO: wtf am I supposed to do here?
 app
   :: Conf
   -> DB.FirstAppDB

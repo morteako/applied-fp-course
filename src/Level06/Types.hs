@@ -38,7 +38,7 @@ import           Level06.Types.Topic        (Topic, getTopic, mkTopic)
 import           Level06.Types.Error        (Error (..))
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
-import Data.Aeson (ToJSON)
+import Data.Aeson (ToJSON, FromJSON)
 
 newtype CommentId = CommentId Int
   deriving (Generic, Eq, Show)
@@ -102,16 +102,20 @@ newtype Port = Port
   -- You will notice we're using ``Word16`` as our type for the ``Port`` value.
   -- This is because a valid port number can only be a 16bit unsigned integer.
   { getPort :: Word16 }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+instance FromJSON Port
 
 newtype DBFilePath = DBFilePath
   { getDBFilePath :: FilePath }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic)
+
+instance FromJSON DBFilePath
 
 -- Add some fields to the ``Conf`` type:
 -- - A customisable port number: ``Port``
 -- - A filepath for our SQLite database: ``DBFilePath``
-data Conf = Conf
+data Conf = Conf { port :: Port, dbPath :: DBFilePath }
 
 -- We're storing our Port as a Word16 to be more precise and prevent invalid
 -- values from being used in our application. However Wai is not so stringent.
@@ -126,14 +130,16 @@ data Conf = Conf
 confPortToWai
   :: Conf
   -> Int
-confPortToWai =
-  error "confPortToWai not implemented"
+confPortToWai = fromIntegral . getPort . port
 
 -- Similar to when we were considering our application types. We can add to this sum type
 -- as we build our application and the compiler can help us out.
 data ConfigError
-  = BadConfFile
+  = BadConfFile String
+  | MissingPortConf
+  | MissingDbFileConf
   deriving Show
+
 
 -- Our application will be able to load configuration from both a file and
 -- command line input. We want to be able to use the command line to temporarily
@@ -161,14 +167,16 @@ data ConfigError
 data PartialConf = PartialConf
   { pcPort       :: Maybe (Last Port)
   , pcDBFilePath :: Maybe (Last DBFilePath)
-  }
+  } deriving (Generic)
+
+instance FromJSON PartialConf
 
 -- We need to define a ``Semigroup`` instance for ``PartialConf``. We define our ``(<>)``
 -- function to lean on the ``Semigroup`` instance for Last to always get the last value.
 instance Semigroup PartialConf where
   _a <> _b = PartialConf
-    { pcPort       = error "pcPort (<>) not implemented"
-    , pcDBFilePath = error "pcDBFilePath (<>) not implemented"
+    { pcPort       = pcPort _a <> pcPort _b
+    , pcDBFilePath = pcDBFilePath _a <> pcDBFilePath _b
     }
 
 -- | When it comes to reading the configuration options from the command-line, we

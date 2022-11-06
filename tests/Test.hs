@@ -30,12 +30,7 @@ import           Test.Tasty         (defaultMain, testGroup)
 
 -- | 'tasty-wai' makes it easier to create requests to submit to our
 -- application, and provides some helper functions for checking our assertions.
--- | 'tasty-wai' makes it easier to create requests to submit to our
--- application, and provides some helper functions for checking our assertions.
--- | 'tasty-wai' makes it easier to create requests to submit to our
--- application, and provides some helper functions for checking our assertions.
--- | 'tasty-wai' makes it easier to create requests to submit to our
--- application, and provides some helper functions for checking our assertions.
+
 import           Test.Tasty.Wai     (assertBody, assertStatus', get, post,
                                      testWai, assertBodyContains, SResponse (simpleBody))
 
@@ -51,48 +46,50 @@ import           Network.HTTP.Types as HTTP
 -- | This import is provided for you so you can check your work from Level02. As
 -- you move forward, come back and import your latest 'Application' so that you
 -- can test your work as you progress.
-import qualified Level05.Core       as Core
+import qualified Level06.Core       as Core
 import Control.Monad.Cont (MonadIO(liftIO))
 
 import qualified Data.Aeson as Aeson
 import Test.Tasty.HUnit (assertEqual, assertBool, assertFailure)
-import Level05.Conf (Conf(Conf))
+import Level06.Conf (parseOptions)
+import Level06.AppM (runAppM)
+import Data.Either (fromRight)
 
 main :: IO ()
 main = do
-
-        firstAppDb <- Core.prepareAppReqs $ Conf ":memory:"
+        firstAppDb <- runAppM Core.prepareAppReqs
+        let (conf, db) = fromRight (error "test") firstAppDb
 
         let
-            app = Core.app $ either (const $ error "test") id firstAppDb
-        
+            app = Core.app conf db
+
         let testtopic = "testtopic"
 
-        defaultMain $ 
+        defaultMain $
             testGroup "Applied FP Course - Tests"
-                [ 
+                [
                     testWai app "Add topic" $ do
                         g <- post (testtopic <> "/add") "comment"
                         assertStatus' HTTP.status200 g
-                    , 
+                    ,
                     testWai app "List Topics" $ do
 
-                        g <- get "list" 
+                        g <- get "list"
                         let Just (body::[String]) = Aeson.decode $ simpleBody g
                         assertStatus' HTTP.status200 g
                         liftIO $ assertBool "topicsEq" $ "testtopic" `elem` body
-                    , 
+                    ,
                     testWai app "View topic" $ do
 
-                        g <- get "list" 
+                        g <- get "list"
                         let Just (body::[String]) = Aeson.decode $ simpleBody g
                         assertStatus' HTTP.status200 g
                         liftIO $ assertBool "topicsEq" $ "testtopic" `elem` body
-                    , 
+                    ,
                     testWai app "View topic empty" $ do
-                        resp <- get "nontopic/view" 
+                        resp <- get "nontopic/view"
                         assertBody "[]" resp
-                    , 
+                    ,
                     testWai app "Empty Input" $ do
                         resp <- post "fudge/add" ""
                         assertStatus' HTTP.status400 resp
