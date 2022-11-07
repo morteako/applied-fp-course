@@ -55,7 +55,7 @@ import           Level06.Types                      (Conf, ConfigError(..),
                                                      Error (..),
                                                      RqType (AddRq, ListRq, ViewRq),
                                                      mkCommentText, mkTopic,
-                                                     renderContentType, dbPath, getDBFilePath)
+                                                     renderContentType, dbPath, getDBFilePath, confPortToWai)
 import Data.Bifunctor (first)
 import System.IO (hPrint, stderr)
 import System.Exit (exitWith, ExitCode (..))
@@ -89,7 +89,7 @@ runApplication = do
       -- application. This function 'finally' will execute the first 'IO a', and then, even in the
       -- case of that value throwing an exception, execute the second 'IO b'. We do this to ensure
       -- that our DB connection will always be closed when the application finishes, or crashes.
-      Ex.finally (run 3000 $ app cfg db) (DB.closeDB db)
+      Ex.finally (run (confPortToWai cfg) $ app cfg db) (DB.closeDB db)
 
 getCfgError :: ConfigError -> String
 getCfgError err = case err of
