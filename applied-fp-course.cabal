@@ -87,9 +87,7 @@ library
 test-suite app-fp-tests
   default-language: Haskell2010
   type:             exitcode-stdio-1.0
-  hs-source-dirs:   
-    src
-    tests
+  hs-source-dirs:   tests
   main-is:          Test.hs
   build-depends:
       applied-fp-course
@@ -107,29 +105,6 @@ test-suite app-fp-tests
     , transformers
     , wai
     , wai-extra
-        , sqlite-simple         ^>=0.4
-    , sqlite-simple-errors  ^>=0.6
-    , time                  >=1.4  && <1.10
-    , warp                  >=3.2  && <3.4
-  other-modules:
-    Level04.Conf
-    Level04.Core
-    Level04.DB
-    Level04.DB.Types
-    Level04.Types
-    Level04.Types.CommentText
-    Level04.Types.Error
-    Level04.Types.Topic
-    Level05.AppM
-    Level05.Conf
-    Level05.Core
-    Level05.DB
-    Level05.DB.Types
-    Level05.Types
-    Level05.Types.CommentText
-    Level05.Types.Error
-    Level05.Types.Topic
-   
 
 -- Level Executables
 executable level01-exe

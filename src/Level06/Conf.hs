@@ -27,7 +27,7 @@ defaultConf
   :: PartialConf
 defaultConf = PartialConf
   { pcPort = Just $ Last $ Port 3000
-  , pcDBFilePath = Nothing
+  , pcDBFilePath = Just $ Last $ DBFilePath ":memory:"
   }
 
 -- | We need something that will take our PartialConf and see if can finally build
