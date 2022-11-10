@@ -161,12 +161,11 @@ resp200Json =
   mkResponse status200 JSON . encode
 
 -- | Now that we have our configuration, pass it where it needs to go.
--- TODO: wtf am I supposed to do here?
 app
   :: Conf
   -> DB.FirstAppDB
   -> Application
-app cfg db rq cb =
+app _cfg db rq cb =
   runApp (handleRequest db =<< mkRequest rq) >>= cb . handleRespErr
   where
     handleRespErr :: Either Error Response -> Response
