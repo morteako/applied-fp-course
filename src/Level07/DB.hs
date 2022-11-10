@@ -20,15 +20,12 @@ import qualified Database.SQLite.Simple             as Sql
 import qualified Common.SQLite.Error                as Sql
 import           Common.SQLite.Error                (SQLiteResponse)
 
-import           Level07.AppM                      (App, Env (envDB) )
-import           Level07.Types                     (Comment, CommentText,
+import           Level07.AppM                       (App, Env (envDB) )
+import           Level07.Types                      (Comment, CommentText,
                                                      DBFilePath (getDBFilePath),
                                                      Error (DBError),
                                                      FirstAppDB (FirstAppDB, dbConn),
-                                                     Topic, fromDBComment,
-                                                     getCommentText, getTopic,
-                                                     mkTopic)
-import Level07.DB.Types (DBComment)
+                                                     Topic, fromDBComment)
 import Control.Monad.Error.Class (liftEither)
 
 -- Quick helper to pull the connection and close it down.

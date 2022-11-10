@@ -10,12 +10,10 @@ module Level04.DB
   , deleteTopic
   ) where
 
-import           Data.Text                          (Text)
-import qualified Data.Text                          as Text
 
 import           Data.Time                          (getCurrentTime)
 
-import           Database.SQLite.Simple             (Connection, Query (Query))
+import           Database.SQLite.Simple             (Connection)
 import qualified Database.SQLite.Simple             as Sql
 
 import qualified Common.SQLite.Error                as Sql
@@ -23,11 +21,10 @@ import           Common.SQLite.Error                (SQLiteResponse)
 
 import           Level04.Types                      (Comment, CommentText,
                                                      Error, Topic, fromDBComment)
-import Level04.DB.Types (DBComment(DBComment))
+import Level04.DB.Types (DBComment)
 import Database.SQLite.Simple.Types (Only(..))
 import Data.Bifunctor (first)
 import Level04.Types.Error (Error(SqlError))
-import Control.Monad ((<=<))
 
 -- ------------------------------------------------------------------------------|
 -- You'll need the documentation for sqlite-simple & sqlite-simple-errors handy! |

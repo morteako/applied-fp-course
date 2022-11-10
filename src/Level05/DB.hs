@@ -11,14 +11,10 @@ module Level05.DB
 
 import           Control.Monad.IO.Class             (liftIO)
 
-import           Data.Text                          (Text)
-import qualified Data.Text                          as Text
 
-import           Data.Bifunctor                     (first)
 import           Data.Time                          (getCurrentTime)
 
-import           Database.SQLite.Simple             (Connection,
-                                                     Query (fromQuery))
+import           Database.SQLite.Simple             (Connection)
 import qualified Database.SQLite.Simple             as Sql
 
 import qualified Common.SQLite.Error                as Sql
@@ -26,12 +22,10 @@ import           Common.SQLite.Error                (SQLiteResponse)
 
 import           Level05.Types                      (Comment, CommentText,
                                                      Error (SqlError), Topic,
-                                                     fromDBComment,
-                                                     getCommentText, getTopic,
-                                                     mkTopic)
+                                                     fromDBComment)
 
 import           Level05.AppM                       (AppM, liftEither)
-import Level05.DB.Types (DBComment(..))
+import Level05.DB.Types (DBComment)
 import Database.SQLite.Simple.Types (Only(..))
 
 -- We have a data type to simplify passing around the information we need to run
