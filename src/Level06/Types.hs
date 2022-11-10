@@ -26,10 +26,7 @@ module Level06.Types
 import           GHC.Generics               (Generic)
 import           GHC.Word                   (Word16)
 import           Data.ByteString            (ByteString)
--- import           Data.Text                  (Text, pack)
 import           Data.Semigroup             (Last (..), Semigroup ((<>)))
--- import           Data.List                  (stripPrefix)
--- import           Data.Maybe                 (fromMaybe)
 import           Data.Time                  (UTCTime)
 
 import           Level06.DB.Types           (DBComment (..))
