@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
 
 module Level07.Types.Topic (
   Topic,
@@ -9,7 +8,6 @@ module Level07.Types.Topic (
 ) where
 
 import Data.Aeson (ToJSON)
-import Data.Functor.Contravariant (contramap)
 import Data.Text (Text)
 
 import Level07.Types.Error (Error (EmptyTopic), nonEmptyText)

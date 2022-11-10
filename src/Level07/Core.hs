@@ -8,6 +8,7 @@ module Level07.Core (
 
 import qualified Control.Exception as Ex
 import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Error.Class (liftEither)
 
 import Network.Wai (
   Application,
@@ -15,19 +16,9 @@ import Network.Wai (
   Response,
   pathInfo,
   requestMethod,
-  responseLBS,
   strictRequestBody,
  )
 import Network.Wai.Handler.Warp (run)
-
-import Network.HTTP.Types (
-  Status,
-  hContentType,
-  status200,
-  status400,
-  status404,
-  status500,
- )
 
 import qualified Data.ByteString.Lazy.Char8 as LBS
 
@@ -38,16 +29,10 @@ import Data.Either (
 
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8)
-import Data.Text.Lazy.Encoding (encodeUtf8)
 
 import Database.SQLite.SimpleErrors.Types (SQLiteResponse)
 
-import qualified Data.Aeson as Aeson
-import Data.Aeson (encode)
-import qualified Data.Aeson.Encoding as Aeson
-import Data.Aeson.Types (ToJSON)
-
-import           Level07.AppM                       (App, Env(..), liftEither, runApp)
+import           Level07.AppM                       (App, Env(..), runApp)
 import qualified Level07.Conf                       as Conf
 import qualified Level07.DB                         as DB
 import qualified Level07.Responses                  as Res
@@ -61,6 +46,10 @@ import           Level07.Types                      (Conf, ConfigError(..),
 -- | We're going to use the `mtl` ExceptT monad transformer to make the loading of
 -- our `Conf` a bit more straight-forward.
 import           Control.Monad.Except               (ExceptT (..), runExceptT)
+import Data.Bifunctor (first)
+import qualified System.IO as IO
+import qualified Data.Text as T
+import Control.Monad ( (<=<) )
 
 -- | Our start-up is becoming more complicated and could fail in new and
 -- interesting ways. But we also want to be able to capture these errors in a
@@ -92,9 +81,15 @@ runApplication = do
 -- 'mtl' on Hackage: https://hackage.haskell.org/package/mtl
 --
 prepareAppReqs :: ExceptT StartUpError IO Env
-prepareAppReqs = error "prepareAppReqs not reimplemented with ExceptT"
+prepareAppReqs = do
+  conf <- (liftEither <=< liftIO) $ first ConfErr <$> Conf.parseOptions "files/appconfig.json"
+  db <- (liftEither <=< liftIO) $ first DBInitErr <$> DB.initDB (dbPath conf)
+  pure $ Env { envLoggingFn = logToConsole, envConfig = conf, envDB = db}
   -- You may copy your previous implementation of this function and try refactoring it. On the
   -- condition you have to explain to the person next to you what you've done and why it works.
+
+logToConsole :: Text -> App ()
+logToConsole = liftIO . IO.putStr . T.unpack
 
 -- | Now that our request handling and response creating functions operate
 -- within our App context, we need to run the App to get our IO action out
@@ -103,8 +98,12 @@ prepareAppReqs = error "prepareAppReqs not reimplemented with ExceptT"
 app
   :: Env
   -> Application
-app =
-  error "Copy your completed 'app' from the previous level and refactor it here"
+app env rq cb =
+  -- cb . either mkErrorResponse id =<< runAppM (handleRequest =<< mkRequest rq) env
+  do
+    let getResponse = mkRequest rq >>= handleRequest
+    response <- either mkErrorResponse id <$> runApp getResponse env
+    cb response
 
 handleRequest ::
   RqType ->

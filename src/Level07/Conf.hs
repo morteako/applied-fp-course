@@ -6,10 +6,6 @@ module Level07.Conf
 
 import           GHC.Word                 (Word16)
 
-import           Data.Bifunctor           (first)
-import           Data.Monoid              ((<>))
-
-import           Level07.AppM             (AppM, liftEither)
 import           Level07.Types            (Conf (..), ConfigError (MissingPortConf, MissingDbFileConf),
                                            DBFilePath (DBFilePath), PartialConf (..),
                                            Port (Port))
@@ -17,8 +13,6 @@ import           Level07.Types            (Conf (..), ConfigError (MissingPortCo
 import           Level07.Conf.CommandLine (commandLineParser)
 import           Level07.Conf.File        (parseJSONConfigFile)
 import Data.Semigroup (Last(Last), getLast)
-import Data.Maybe (fromMaybe)
-import Control.Monad.IO.Class (liftIO)
 
 -- | For the purposes of this application we will encode some default values to
 -- ensure that our application continues to function in the event of missing
@@ -55,12 +49,13 @@ makeConfig pc =
 --
 parseOptions
   :: FilePath
-  -> AppM ConfigError Conf
+  -> IO (Either ConfigError Conf)
 parseOptions path = do
   -- Parse the options from the config file: "files/appconfig.json"
   -- Parse the options from the commandline using 'commandLineParser'
   -- Combine these with the default configuration 'defaultConf'
   -- Return the final configuration value
+  let withDefaultConf file commandLine = defaultConf <> file <> commandLine
   fileConfig <- parseJSONConfigFile path
-  cmdLineConfig <- liftIO commandLineParser
-  liftEither $ makeConfig $ defaultConf <> fileConfig <> cmdLineConfig
+  cmdLineConfig <- commandLineParser
+  pure $ makeConfig =<< withDefaultConf <$> fileConfig <*> pure cmdLineConfig

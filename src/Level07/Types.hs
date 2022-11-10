@@ -38,6 +38,7 @@ import           Database.SQLite.Simple     (Connection)
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Encoding as Aeson
 import Data.Aeson (ToJSON, FromJSON)
+import Control.Exception (IOException)
 
 newtype CommentId = CommentId Int
   deriving (Generic, Eq, Show)
@@ -135,6 +136,7 @@ confPortToWai = fromIntegral . getPort . port
 -- as we build our application and the compiler can help us out.
 data ConfigError
   = BadConfFile String
+  | ConfigFileReadError IOException
   | MissingPortConf
   | MissingDbFileConf
   deriving Show

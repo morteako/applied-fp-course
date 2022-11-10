@@ -12,7 +12,6 @@ import Level07.Types.Error (
   nonEmptyText,
  )
 
-import Data.Functor.Contravariant (contramap)
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import Data.Aeson (ToJSON)

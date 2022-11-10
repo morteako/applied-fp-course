@@ -46,22 +46,21 @@ import           Network.HTTP.Types as HTTP
 -- | This import is provided for you so you can check your work from Level02. As
 -- you move forward, come back and import your latest 'Application' so that you
 -- can test your work as you progress.
-import qualified Level06.Core       as Core
+import qualified Level07.Core       as Core
 import Control.Monad.Cont (MonadIO(liftIO))
 
 import qualified Data.Aeson as Aeson
 import Test.Tasty.HUnit (assertEqual, assertBool, assertFailure)
-import Level06.Conf (parseOptions)
-import Level06.AppM (runAppM)
+import Level07.Conf (parseOptions)
+import Level07.AppM (Env(..))
 import Data.Either (fromRight)
+import Control.Monad.Except (runExceptT)
 
 main :: IO ()
 main = do
-        firstAppDb <- runAppM Core.prepareAppReqs
-        let (conf, db) = fromRight (error "test") firstAppDb
-
-        let
-            app = Core.app conf db
+        firstAppDb <- runExceptT Core.prepareAppReqs
+        let env = fromRight (error "test") firstAppDb
+        let app = Core.app env
 
         let testtopic = "testtopic"
 

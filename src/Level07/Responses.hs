@@ -7,8 +7,6 @@ import           Network.HTTP.Types         (Status, hContentType, status200,
 
 import qualified Data.ByteString.Lazy.Char8 as LBS
 
-import           Data.Text.Lazy.Encoding    (encodeUtf8)
-
 import qualified Data.Aeson                 as Aeson
 import           Data.Aeson                 (ToJSON)
 

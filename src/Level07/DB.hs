@@ -12,21 +12,15 @@ module Level07.DB
 import           Control.Monad.IO.Class             (liftIO)
 import           Control.Monad.Reader               (asks)
 
-import           Data.Bifunctor                     (first)
-import           Data.Text                          (Text)
-import qualified Data.Text                          as Text
-
 import           Data.Time                          (getCurrentTime)
 
-import           Database.SQLite.Simple             (Connection, FromRow,
-                                                     Query (fromQuery), ToRow)
+import           Database.SQLite.Simple             (Connection)
 import qualified Database.SQLite.Simple             as Sql
 
 import qualified Database.SQLite.SimpleErrors       as Sql
 import           Database.SQLite.SimpleErrors.Types (SQLiteResponse)
 
-import           Level07.AppM                      (App, Env (envDB))
-
+import           Level07.AppM                      (App, Env (envDB) )
 import           Level07.Types                     (Comment, CommentText,
                                                      DBFilePath (getDBFilePath),
                                                      Error (DBError),
@@ -34,6 +28,8 @@ import           Level07.Types                     (Comment, CommentText,
                                                      Topic, fromDBComment,
                                                      getCommentText, getTopic,
                                                      mkTopic)
+import Level07.DB.Types (DBComment)
+import Control.Monad.Error.Class (liftEither)
 
 -- Quick helper to pull the connection and close it down.
 closeDB
@@ -62,38 +58,55 @@ initDB fp = Sql.runDBAction $ do
 
 getDBConn
   :: App Connection
-getDBConn =
-  error "getDBConn not implemented"
+getDBConn = asks $ dbConn . envDB
 
 runDB
   :: (a -> Either Error b)
   -> (Connection -> IO a)
   -> App b
-runDB =
-  error "runDB not re-implemented"
+runDB f query = do
+  conn <- getDBConn
+  res <- liftIO $ Sql.runDBAction $ query conn
+  liftEither $ either (Left . DBError) f res
 
 getComments
   :: Topic
   -> App [Comment]
-getComments =
-  error "Copy your completed 'getComments' and refactor to match the new type signature"
+getComments topic =
+  let
+    sql = "SELECT id,topic,comment,time FROM comments WHERE topic = ?"
+    query conn = Sql.query conn sql (Sql.Only topic)
+  in
+    runDB (traverse fromDBComment) query
 
 addCommentToTopic
   :: Topic
   -> CommentText
   -> App ()
-addCommentToTopic =
-  error "Copy your completed 'appCommentToTopic' and refactor to match the new type signature"
+addCommentToTopic topic comment =
+  let
+    sql = "INSERT INTO comments (topic,comment,time) VALUES (?,?,?)"
+    query conn = getCurrentTime >>= \time -> Sql.execute conn sql (topic, comment, time)
+  in
+    runDB Right query
 
 getTopics
   :: App [Topic]
 getTopics =
-  error "Copy your completed 'getTopics' and refactor to match the new type signature"
+  let
+    sql = "SELECT DISTINCT topic FROM comments"
+    query conn = Sql.query_ conn sql :: IO [Topic]
+  in
+    runDB Right query
 
 deleteTopic
   :: Topic
   -> App ()
-deleteTopic =
-  error "Copy your completed 'deleteTopic' and refactor to match the new type signature"
+deleteTopic topic =
+  let
+    sql = "DELETE FROM comments WHERE topic = ?"
+    query conn = Sql.execute conn sql (Sql.Only topic)
+  in do
+    runDB Right query
 
 -- Go on to 'src/Level07/Core.hs' next.
