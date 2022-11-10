@@ -30,7 +30,7 @@ import Data.Either (
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8)
 
-import Database.SQLite.SimpleErrors.Types (SQLiteResponse)
+import Common.SQLite.Error (SQLiteResponse)
 
 import           Level07.AppM                       (App, Env(..), runApp)
 import qualified Level07.Conf                       as Conf

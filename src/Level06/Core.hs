@@ -40,7 +40,7 @@ import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8)
 import Data.Text.Lazy.Encoding (encodeUtf8)
 
-import Database.SQLite.SimpleErrors.Types (SQLiteResponse)
+import Common.SQLite.Error (SQLiteResponse)
 
 import qualified Data.Aeson as Aeson
 import Data.Aeson (encode)

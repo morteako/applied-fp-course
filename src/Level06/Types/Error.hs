@@ -5,7 +5,7 @@ module Level06.Types.Error
   ) where
 
 import Data.Text (Text)
-import Database.SQLite.SimpleErrors.Types (SQLiteResponse)
+import Common.SQLite.Error (SQLiteResponse)
 
 data Error
   = UnknownRoute

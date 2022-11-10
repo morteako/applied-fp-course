@@ -13,7 +13,7 @@ copyright:
 category:           Education
 build-type:         Simple
 extra-source-files: changelog.md
-tested-with:        GHC ==8.4.3 || ==8.6.1 || ==8.10.7
+tested-with:        GHC ==9.2.4
 
 source-repository head
   type:     git
@@ -22,6 +22,7 @@ source-repository head
 library
   -- Modules included in this executable, other than Main.
   exposed-modules:
+    Common.SQLite.Error
     Level01.Core
     Level02.Core
     Level02.Types
@@ -73,16 +74,15 @@ library
   -- Other library packages from which modules are imported.
   build-depends:
       attoparsec            >=0.13 && <0.15
-    , base                  >=4.11 && <4.15
-    , bytestring            ^>=0.10
+    , base                  >=4.16 && <4.17
+    , bytestring            ^>=0.11
     , contravariant         >=1.4  && <1.6
     , http-types            >=0.9  && <0.13
-    , lens                  >=4.15 && <4.20 || >=5 && <5.1
+    , lens                  ^>=5.1
     , mtl                   ^>=2.2
     , old-locale            >=1.0  && <1.5
     , optparse-applicative  >=0.13 && <0.17
     , sqlite-simple         ^>=0.4
-    , sqlite-simple-errors  ^>=0.6
     , text                  ^>=1.2
     , time                  >=1.4  && <1.10
     , transformers          >=0.4  && <0.6
@@ -104,12 +104,12 @@ test-suite app-fp-tests
   build-depends:
       applied-fp-course
     , base
-    , bytestring         ^>=0.10
-    , hedgehog           ^>=1.0.1
+    , bytestring         ^>=0.11
+    , hedgehog           ^>=1.2
     , http-types
     , mtl
     , tasty              >=0.8     && <1.5
-    , tasty-hedgehog     ^>=1.1.0.0
+    , tasty-hedgehog     ^>=1.4.0.0
     , tasty-hunit        >=0.9     && <0.11
     , tasty-wai          ^>=0.1
     , aeson

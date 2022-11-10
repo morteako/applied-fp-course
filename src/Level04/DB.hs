@@ -18,8 +18,8 @@ import           Data.Time                          (getCurrentTime)
 import           Database.SQLite.Simple             (Connection, Query (Query))
 import qualified Database.SQLite.Simple             as Sql
 
-import qualified Database.SQLite.SimpleErrors       as Sql
-import           Database.SQLite.SimpleErrors.Types (SQLiteResponse)
+import qualified Common.SQLite.Error                as Sql
+import           Common.SQLite.Error                (SQLiteResponse)
 
 import           Level04.Types                      (Comment, CommentText,
                                                      Error, Topic, fromDBComment)

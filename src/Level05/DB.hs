@@ -21,8 +21,8 @@ import           Database.SQLite.Simple             (Connection,
                                                      Query (fromQuery))
 import qualified Database.SQLite.Simple             as Sql
 
-import qualified Database.SQLite.SimpleErrors       as Sql
-import           Database.SQLite.SimpleErrors.Types (SQLiteResponse)
+import qualified Common.SQLite.Error                as Sql
+import           Common.SQLite.Error                (SQLiteResponse)
 
 import           Level05.Types                      (Comment, CommentText,
                                                      Error (SqlError), Topic,
