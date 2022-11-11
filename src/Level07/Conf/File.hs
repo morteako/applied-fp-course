@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Level07.Conf.File where
 
 import           Data.ByteString.Lazy            (ByteString)

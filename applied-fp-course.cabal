@@ -94,10 +94,10 @@ library
   hs-source-dirs:   src
 
   -- Base language which the package is written in.
-  default-language: Haskell2010
+  default-language: GHC2021
 
 test-suite app-fp-tests
-  default-language: Haskell2010
+  default-language: GHC2021
   type:             exitcode-stdio-1.0
   hs-source-dirs:   tests
   main-is:          Test.hs
@@ -126,7 +126,7 @@ executable level01-exe
       applied-fp-course
     , base
 
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable level02-exe
   main-is:          Level02.hs
@@ -135,7 +135,7 @@ executable level02-exe
       applied-fp-course
     , base
 
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable level04-exe
   main-is:          Level04.hs
@@ -144,7 +144,7 @@ executable level04-exe
       applied-fp-course
     , base
 
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable level05-exe
   main-is:          Level05.hs
@@ -153,7 +153,7 @@ executable level05-exe
       applied-fp-course
     , base
 
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable level06-exe
   main-is:          Level06.hs
@@ -162,7 +162,7 @@ executable level06-exe
       applied-fp-course
     , base
 
-  default-language: Haskell2010
+  default-language: GHC2021
 
 executable level07-exe
   main-is:          Level07.hs
@@ -171,4 +171,4 @@ executable level07-exe
       applied-fp-course
     , base
 
-  default-language: Haskell2010
+  default-language: GHC2021

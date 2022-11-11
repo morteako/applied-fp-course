@@ -1,6 +1,3 @@
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE InstanceSigs          #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 module Level05.AppM
   ( AppM
   , liftEither

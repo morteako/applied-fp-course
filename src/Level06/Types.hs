@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE DuplicateRecordFields #-}
 
 module Level06.Types
   ( Error (..)
