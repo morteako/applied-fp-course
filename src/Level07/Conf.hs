@@ -20,8 +20,8 @@ import Data.Semigroup (Last(Last), getLast)
 defaultConf
   :: PartialConf
 defaultConf = PartialConf
-  { pcPort = Just $ Last $ Port 3000
-  , pcDBFilePath = Just $ Last $ DBFilePath ":memory:"
+  { port = Just $ Last $ Port 3000
+  , dbFilePath = Just $ Last $ DBFilePath ":memory:"
   }
 
 -- | We need something that will take our PartialConf and see if can finally build
@@ -32,8 +32,8 @@ makeConfig
   -> Either ConfigError Conf
 makeConfig pc =
   Conf
-    <$> getFieldOr MissingPortConf pcPort
-    <*> getFieldOr MissingDbFileConf pcDBFilePath
+    <$> getFieldOr MissingPortConf (.port)
+    <*> getFieldOr MissingDbFileConf (.dbFilePath)
   where
     getFieldOr err f = maybe (Left err) (Right . getLast) $ f pc
 

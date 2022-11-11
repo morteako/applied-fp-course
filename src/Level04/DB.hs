@@ -38,15 +38,15 @@ import Level04.Types.Error (Error(SqlError))
 -- To help with that, we create a new data type that can hold our `Connection`
 -- for us, and allows it to be expanded later if we need to
 data FirstAppDB = FirstAppDB
-  { dbConn :: Connection
+  { conn :: Connection
   }
 
 -- Quick helper to pull the connection and close it down.
 closeDB
   :: FirstAppDB
   -> IO ()
-closeDB =
-  Sql.close . dbConn
+closeDB db =
+  Sql.close db.conn
 
 -- Given a `FilePath` to our SQLite DB file, initialise the database and ensure
 -- our Table is there by running a query to create it, if it doesn't exist
@@ -82,8 +82,7 @@ getComments
 getComments db topic =
   let
     sql = "SELECT id,topic,comment,time FROM comments WHERE topic = ?"
-    conn = dbConn db
-    query = Sql.query conn sql (Only topic) :: IO [DBComment]
+    query = Sql.query db.conn sql (Only topic) :: IO [DBComment]
   -- There are several possible implementations of this function. Particularly
   -- there may be a trade-off between deciding to throw an Error if a DBComment
   -- cannot be converted to a Comment, or simply ignoring any DBComment that is
@@ -102,10 +101,9 @@ addCommentToTopic
 addCommentToTopic db topic comment =
   let
     sql = "INSERT INTO comments (topic,comment,time) VALUES (?,?,?)"
-    conn = dbConn db
   in do
     time <- getCurrentTime
-    let query = Sql.execute conn sql (topic, comment, time)
+    let query = Sql.execute db.conn sql (topic, comment, time)
     dbResponse <- Sql.runDBAction query
     pure $ first SqlError dbResponse
 
@@ -115,8 +113,7 @@ getTopics
 getTopics db =
   let
     sql = "SELECT DISTINCT topic FROM comments"
-    conn = dbConn db
-    query = Sql.query_ conn sql :: IO [Topic]
+    query = Sql.query_ db.conn sql :: IO [Topic]
   in do
     dbResponse <- Sql.runDBAction query
     pure $ first SqlError dbResponse
@@ -128,8 +125,7 @@ deleteTopic
 deleteTopic db topic =
   let
     sql = "DELETE FROM comments WHERE topic = ?"
-    conn = dbConn db
-    query = Sql.execute conn sql (Only topic)
+    query = Sql.execute db.conn sql (Only topic)
   in do
     dbResponse <- Sql.runDBAction query
     pure $ first SqlError dbResponse

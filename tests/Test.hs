@@ -59,7 +59,7 @@ import Control.Monad.Except (runExceptT)
 main :: IO ()
 main = do
         firstAppDb <- runExceptT Core.prepareAppReqs
-        let env = fromRight (error "test") firstAppDb
+        let env = either (error . show) id firstAppDb
         let app = Core.app env
 
         let testtopic = "testtopic"

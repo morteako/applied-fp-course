@@ -25,6 +25,9 @@ newtype AppM e a = AppM
   { runAppM :: IO (Either e a)
   }
 
+runAppM :: AppM e a -> IO (Either e a)
+runAppM = (.runAppM)
+
 -- Predominantly our application has only one error type: 'Error'. It would be tedious to have to
 -- declare that on every signature. We're able to use a type _alias_ to avoid this problem. We can
 -- define this type alias to make the error type variable concrete as 'Error'.

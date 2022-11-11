@@ -15,13 +15,12 @@ import           Database.SQLite.Simple.FromRow (FromRow (fromRow), field)
 -- Comment type, but without the newtype wrappers for each value. To get started,
 -- just copy the new definition for the `Comment` type from Level06.Types.
 data DBComment = DBComment
-  { dbCommentId    :: Int
-  , dbCommentTopic :: Text
-  , dbCommentBody  :: Text
-  , dbCommentTime  :: UTCTime
+  { id    :: Int
+  , topic :: Text
+  , body  :: Text
+  , time  :: UTCTime
 } 
-  -- NB: Haskell does not allow duplicate field names for records so the field
-  -- names for this type will have to be slightly different
+
 
 -- This Typeclass comes from the `sqlite-simple` package and describes how to
 -- decode a single row from the database into a single representation of our

@@ -65,11 +65,11 @@ runApplication = do
   either print runWithDBConn appE
   where
     runWithDBConn env =
-      appWithDB env >> DB.closeDB (envDB env)
+      appWithDB env >> DB.closeDB env.db
 
     appWithDB env = Ex.finally
-      (run ( confPortToWai . envConfig $ env ) (app env))
-      $ DB.closeDB (envDB env)
+      (run ( confPortToWai env.config ) (app env))
+      $ DB.closeDB env.db
 
 -- | Our AppM is no longer useful for implementing this function. Can you explain why?
 --
@@ -83,8 +83,8 @@ runApplication = do
 prepareAppReqs :: ExceptT StartUpError IO Env
 prepareAppReqs = do
   conf <- (liftEither <=< liftIO) $ first ConfErr <$> Conf.parseOptions "files/appconfig.json"
-  db <- (liftEither <=< liftIO) $ first DBInitErr <$> DB.initDB (dbPath conf)
-  pure $ Env { envLoggingFn = logToConsole, envConfig = conf, envDB = db}
+  db <- (liftEither <=< liftIO) $ first DBInitErr <$> DB.initDB conf.dbPath
+  pure $ Env { loggingFn = logToConsole, config = conf, db = db}
   -- You may copy your previous implementation of this function and try refactoring it. On the
   -- condition you have to explain to the person next to you what you've done and why it works.
 

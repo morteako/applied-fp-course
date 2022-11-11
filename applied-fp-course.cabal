@@ -96,6 +96,8 @@ library
   -- Base language which the package is written in.
   default-language: GHC2021
 
+  default-extensions: OverloadedRecordDot, DuplicateRecordFields, NoFieldSelectors
+
 test-suite app-fp-tests
   type:             exitcode-stdio-1.0
   hs-source-dirs:   tests

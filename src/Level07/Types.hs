@@ -20,6 +20,7 @@ module Level07.Types
   , renderContentType
   , confPortToWai
   , fromDBComment
+  , dbConn
   ) where
 
 import           GHC.Generics               (Generic)
@@ -47,10 +48,10 @@ instance ToJSON CommentId
 -- straightforward record type, containing an `Int`, `Topic`, `CommentText`, and
 -- `UTCTime`.
 data Comment = Comment
-  { commentId    :: CommentId
-  , commentTopic :: Topic
-  , commentBody  :: CommentText
-  , commentTime  :: UTCTime
+  { id    :: CommentId
+  , topic :: Topic
+  , body  :: CommentText
+  , time  :: UTCTime
   }
   deriving (Generic, Show)
 
@@ -65,12 +66,12 @@ fromDBComment
   -> Either Error Comment
 fromDBComment dbc =
   let
-    _commentId = CommentId $ dbCommentId dbc
-    topic = mkTopic $ dbCommentTopic dbc
-    body = mkCommentText $ dbCommentBody dbc
-    time = dbCommentTime dbc
+    commentId = CommentId dbc.id
+    topic = mkTopic dbc.topic
+    body = mkCommentText dbc.body
+    time = dbc.time
   in
-    Comment _commentId <$> topic <*> body <*> pure time
+    Comment commentId <$> topic <*> body <*> pure time
 
 data RqType
   = AddRq Topic CommentText
@@ -102,13 +103,21 @@ newtype Port = Port
   { getPort :: Word16 }
   deriving (Eq, Show, Generic)
 
-instance FromJSON Port
+instance FromJSON Port where
+  -- TODO: Why is this necessary???
+  parseJSON = Aeson.genericParseJSON unwrapNewtype
 
 newtype DBFilePath = DBFilePath
   { getDBFilePath :: FilePath }
   deriving (Eq, Show, Generic)
 
-instance FromJSON DBFilePath
+instance FromJSON DBFilePath where
+  -- TODO: Why is this necessary???
+  parseJSON = Aeson.genericParseJSON unwrapNewtype
+
+-- TODO: Why is this necessary???
+unwrapNewtype :: Aeson.Options
+unwrapNewtype = Aeson.defaultOptions { Aeson.unwrapUnaryRecords = True }
 
 -- Add some fields to the ``Conf`` type:
 -- - A customisable port number: ``Port``
@@ -128,7 +137,7 @@ data Conf = Conf { port :: Port, dbPath :: DBFilePath }
 confPortToWai
   :: Conf
   -> Int
-confPortToWai = fromIntegral . getPort . port
+confPortToWai conf = fromIntegral conf.port.getPort
 
 -- Similar to when we were considering our application types. We can add to this sum type
 -- as we build our application and the compiler can help us out.
@@ -164,8 +173,8 @@ data ConfigError
 -- wrapped values. We can then define a ``Semigroup`` instance for it and have our
 -- ``Conf`` be a known good configuration.
 data PartialConf = PartialConf
-  { pcPort       :: Maybe (Last Port)
-  , pcDBFilePath :: Maybe (Last DBFilePath)
+  { port       :: Maybe (Last Port)
+  , dbFilePath :: Maybe (Last DBFilePath)
   } deriving (Generic)
 
 instance FromJSON PartialConf
@@ -173,9 +182,9 @@ instance FromJSON PartialConf
 -- We need to define a ``Semigroup`` instance for ``PartialConf``. We define our ``(<>)``
 -- function to lean on the ``Semigroup`` instance for Last to always get the last value.
 instance Semigroup PartialConf where
-  _a <> _b = PartialConf
-    { pcPort       = pcPort _a <> pcPort _b
-    , pcDBFilePath = pcDBFilePath _a <> pcDBFilePath _b
+  a <> b = PartialConf
+    { port       = a.port <> b.port
+    , dbFilePath = a.dbFilePath <> b.dbFilePath
     }
 
 -- When it comes to reading the configuration options from the command-line, we
@@ -188,5 +197,9 @@ instance Semigroup PartialConf where
 -- having to rewrite all of the functions that need to interact with DB related
 -- things in different ways.
 newtype FirstAppDB = FirstAppDB
-  { dbConn  :: Connection
+  { conn  :: Connection
   }
+
+-- TODO: Why????
+dbConn :: FirstAppDB -> Connection
+dbConn = (.conn)

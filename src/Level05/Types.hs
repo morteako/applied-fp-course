@@ -56,10 +56,10 @@ instance ToJSON CommentId
 -- straightforward record type, containing an `Int`, `Topic`, `CommentText`, and
 -- `UTCTime`.
 data Comment = Comment
-  { commentId    :: CommentId
-  , commentTopic :: Topic
-  , commentBody  :: CommentText
-  , commentTime  :: UTCTime
+  { id    :: CommentId
+  , topic :: Topic
+  , body  :: CommentText
+  , time  :: UTCTime
   }
   deriving (Generic, Show)
 
@@ -76,12 +76,12 @@ fromDBComment
   -> Either Error Comment
 fromDBComment dbc =
   let
-    _commentId = CommentId $ dbCommentId dbc
-    topic = mkTopic $ dbCommentTopic dbc
-    body = mkCommentText $ dbCommentBody dbc
-    time = dbCommentTime dbc
+    commentId = CommentId dbc.id
+    topic = mkTopic dbc.topic
+    body = mkCommentText dbc.body
+    time = dbc.time
   in
-    Comment _commentId <$> topic <*> body <*> pure time
+    Comment commentId <$> topic <*> body <*> pure time
 
 data RqType
   = AddRq Topic CommentText

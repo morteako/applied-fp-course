@@ -47,7 +47,7 @@ import Data.Aeson (encode)
 import qualified Data.Aeson.Encoding as Aeson
 import Data.Aeson.Types (ToJSON)
 
-import           Level06.AppM                       (App, AppM (..), liftEither, runApp)
+import           Level06.AppM                       (App, AppM, runAppM, liftEither, runApp)
 import qualified Level06.Conf                       as Conf
 import qualified Level06.DB                         as DB
 import           Level06.Types                      (Conf, ConfigError(..),
@@ -111,7 +111,7 @@ getCfgError err = case err of
 prepareAppReqs :: AppM StartUpError (Conf, DB.FirstAppDB)
 prepareAppReqs = do
   conf <- first ConfErr $ Conf.parseOptions "files/appconfig.json"
-  db <- first DBInitErr $ liftEither <=< liftIO $ DB.initDB $ getDBFilePath . dbPath $ conf
+  db <- first DBInitErr $ liftEither <=< liftIO $ DB.initDB conf.dbPath.getDBFilePath
   pure (conf, db)
   
 

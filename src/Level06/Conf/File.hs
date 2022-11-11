@@ -12,7 +12,7 @@ import           Control.Exception          (try)
 
 import qualified Data.Attoparsec.ByteString as AB
 
-import           Level06.AppM               (AppM (runAppM), liftEither)
+import           Level06.AppM               (AppM, runAppM, liftEither)
 import           Level06.Types              (ConfigError (BadConfFile),
                                              PartialConf (PartialConf))
 import Control.Exception.Base (IOException, try)

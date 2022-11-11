@@ -100,7 +100,7 @@ runApp = do
 prepareAppReqs ::
   Conf -> IO (Either StartUpError DB.FirstAppDB)
 prepareAppReqs conf =
-  first DBInitErr <$> initDB (dbFilePath conf)
+  first DBInitErr <$> initDB conf.dbFilePath
 
 
 -- | Some helper functions to make our lives a little more DRY.

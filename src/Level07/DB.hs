@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Level07.DB
-  ( FirstAppDB (FirstAppDB)
-  , initDB
+  ( initDB
   , closeDB
   , addCommentToTopic
   , getComments
@@ -20,20 +19,20 @@ import qualified Database.SQLite.Simple             as Sql
 import qualified Common.SQLite.Error                as Sql
 import           Common.SQLite.Error                (SQLiteResponse)
 
-import           Level07.AppM                       (App, Env (envDB) )
+import           Level07.AppM                       (App, Env, envDB)
 import           Level07.Types                      (Comment, CommentText,
                                                      DBFilePath (getDBFilePath),
                                                      Error (DBError),
-                                                     FirstAppDB (FirstAppDB, dbConn),
-                                                     Topic, fromDBComment)
+                                                     FirstAppDB(..),
+                                                     Topic, fromDBComment, dbConn)
 import Control.Monad.Error.Class (liftEither)
 
 -- Quick helper to pull the connection and close it down.
 closeDB
   :: FirstAppDB
   -> IO ()
-closeDB =
-  Sql.close . dbConn
+closeDB db =
+  Sql.close db.conn
 
 initDB
   :: DBFilePath
@@ -42,7 +41,7 @@ initDB fp = Sql.runDBAction $ do
   -- Initialise the connection to the DB...
   -- - What could go wrong here?
   -- - What haven't we be told in the types?
-  con <- Sql.open ( getDBFilePath fp )
+  con <- Sql.open fp.getDBFilePath
   -- Initialise our one table, if it's not there already
   _ <- Sql.execute_ con createTableQ
   pure $ FirstAppDB con
@@ -55,6 +54,8 @@ initDB fp = Sql.runDBAction $ do
 
 getDBConn
   :: App Connection
+-- TODO: WHY U NO WORK??
+-- getDBConn = asks (.db.conn)
 getDBConn = asks $ dbConn . envDB
 
 runDB

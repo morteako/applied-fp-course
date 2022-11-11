@@ -33,15 +33,15 @@ import Database.SQLite.Simple.Types (Only(..))
 -- having to rewrite all of the functions that need to interact with DB related
 -- things in different ways.
 newtype FirstAppDB = FirstAppDB
-  { dbConn  :: Connection
+  { conn  :: Connection
   }
 
 -- Quick helper to pull the connection and close it down.
 closeDB
   :: FirstAppDB
   -> IO ()
-closeDB =
-  Sql.close . dbConn
+closeDB db =
+  Sql.close db.conn
 
 initDB
   :: FilePath
@@ -84,8 +84,7 @@ getComments
 getComments db topic =
   let
     sql = "SELECT id,topic,comment,time FROM comments WHERE topic = ?"
-    conn = dbConn db
-    query = Sql.query conn sql (Only topic) :: IO [DBComment]
+    query = Sql.query db.conn sql (Only topic) :: IO [DBComment]
   in
     runDB (traverse fromDBComment) query
 
@@ -97,8 +96,7 @@ addCommentToTopic
 addCommentToTopic db topic comment =
   let
     sql = "INSERT INTO comments (topic,comment,time) VALUES (?,?,?)"
-    conn = dbConn db
-    query = getCurrentTime >>= \time -> Sql.execute conn sql (topic, comment, time)
+    query = getCurrentTime >>= \time -> Sql.execute db.conn sql (topic, comment, time)
   in
     runDB Right query
 
@@ -108,8 +106,7 @@ getTopics
 getTopics db =
   let
     sql = "SELECT DISTINCT topic FROM comments"
-    conn = dbConn db
-    query = Sql.query_ conn sql :: IO [Topic]
+    query = Sql.query_ db.conn sql :: IO [Topic]
   in
     runDB Right query
 
@@ -120,8 +117,7 @@ deleteTopic
 deleteTopic db topic =
   let
     sql = "DELETE FROM comments WHERE topic = ?"
-    conn = dbConn db
-    query = Sql.execute conn sql (Only topic)
+    query = Sql.execute db.conn sql (Only topic)
   in do
     runDB Right query
 
