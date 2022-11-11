@@ -1,10 +1,10 @@
-cabal-version:      2.0
+cabal-version:      3.6
 name:               applied-fp-course
 version:            0.1.0.0
 synopsis:           Simplest of web apps for educational purposes.
 description:
   Haskell course for people looking to start building larger applications.
-license:            BSD3
+license:            BSD-3-Clause
 license-file:       LICENCE
 author:             QFPL @ Data61
 maintainer:         sean.chalmers@data61.csiro.au
@@ -97,7 +97,6 @@ library
   default-language: GHC2021
 
 test-suite app-fp-tests
-  default-language: GHC2021
   type:             exitcode-stdio-1.0
   hs-source-dirs:   tests
   main-is:          Test.hs
@@ -126,16 +125,12 @@ executable level01-exe
       applied-fp-course
     , base
 
-  default-language: GHC2021
-
 executable level02-exe
   main-is:          Level02.hs
   hs-source-dirs:   exe
   build-depends:
       applied-fp-course
     , base
-
-  default-language: GHC2021
 
 executable level04-exe
   main-is:          Level04.hs
@@ -144,16 +139,12 @@ executable level04-exe
       applied-fp-course
     , base
 
-  default-language: GHC2021
-
 executable level05-exe
   main-is:          Level05.hs
   hs-source-dirs:   exe
   build-depends:
       applied-fp-course
     , base
-
-  default-language: GHC2021
 
 executable level06-exe
   main-is:          Level06.hs
@@ -162,13 +153,9 @@ executable level06-exe
       applied-fp-course
     , base
 
-  default-language: GHC2021
-
 executable level07-exe
   main-is:          Level07.hs
   hs-source-dirs:   exe
   build-depends:
       applied-fp-course
     , base
-
-  default-language: GHC2021
