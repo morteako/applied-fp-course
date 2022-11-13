@@ -20,7 +20,6 @@ module Level07.Types
   , renderContentType
   , confPortToWai
   , fromDBComment
-  , dbConn
   ) where
 
 import           GHC.Generics               (Generic)
@@ -200,6 +199,3 @@ newtype FirstAppDB = FirstAppDB
   { conn  :: Connection
   }
 
--- TODO: Why????
-dbConn :: FirstAppDB -> Connection
-dbConn = (.conn)
